@@ -8,8 +8,20 @@ RUN apt-get update && \
 
 RUN apt-get -y install curl git gnupg jq less man parallel patch ssh vim wget xz-utils
 
+RUN apt-get -y install cmake ninja-build python3
+
 ARG USERNAME
 RUN useradd "${USERNAME}" -ms '/bin/bash'
+
+USER "${USERNAME}"
+
+RUN git clone 'https://github.com/emscripten-core/emsdk' "${HOME}/emsdk" && \
+    cd "${HOME}/emsdk" && \
+    ./emsdk install latest && \
+    ./emsdk activate latest && \
+    printf '\nEMSDK_QUIET=1 . ${HOME}/emsdk/emsdk_env.sh\n' >> "${HOME}/.bashrc"
+
+USER root
 
 ARG COMPOSE_PROJECT_NAME
 COPY --chmod=644 --chown="${USERNAME}:${USERNAME}" '.vimrc' "/home/${USERNAME}"
